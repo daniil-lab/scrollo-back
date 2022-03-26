@@ -1,0 +1,54 @@
+app:
+  jwtSecret: JWT
+  jwtExpirationInMs: 604800000
+
+file:
+  upload-dir: ./uploads
+
+spring:
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    time-zone: UTC
+
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 215MB
+
+  datasource:
+    username: { $DB_USER }
+    password: { $DB_PASS }
+    driver-class-name: org.postgresql.Driver
+    url: { $DB_URL }
+  #    url: jdbc:postgresql://localhost:5432/wp
+
+  jpa:
+    generate-ddl: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    hibernate:
+      create_empty_composites:
+        enabled: false
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+    root: INFO
+
+hibernate:
+  create_empty_composites:
+    enabled: false
+
+springdoc:
+  api-docs:
+    path: /docs
+
+  swagger-ui:
+    path: /swagger
+    csrf:
+      enabled: true
