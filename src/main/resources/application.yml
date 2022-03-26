@@ -19,10 +19,10 @@ spring:
       max-request-size: 215MB
 
   datasource:
-    username: ${ DB_USER }
-    password: ${ DB_PASS }
+    username: { $DB_USER }
+    password: { $DB_PASS }
     driver-class-name: org.postgresql.Driver
-    url: ${ DB_URL }
+    url: { $DB_URL }
   #    url: jdbc:postgresql://localhost:5432/wp
 
   jpa:
