@@ -48,6 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Autowired
+    @Lazy
     private JwtFilter jwtFilter;
 
     @Override

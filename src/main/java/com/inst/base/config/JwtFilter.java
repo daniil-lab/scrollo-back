@@ -4,6 +4,7 @@ import com.inst.base.entity.user.User;
 import com.inst.base.repository.user.UserRepository;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtProvider jwtProvider;
 
     @Autowired
+    @Lazy
     private UserRepository userRepository;
 
     @Override
