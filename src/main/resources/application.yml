@@ -6,6 +6,9 @@ file:
   upload-dir: ./uploads
 
 spring:
+  main:
+    allow-circular-references: true
+
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
