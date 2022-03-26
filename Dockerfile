@@ -12,7 +12,7 @@ RUN gradle clean build
 
 FROM openjdk:17-alpine
 
-COPY --from=build /home/gradle/wp/build/libs/system-dev.jar .
+COPY --from=build /home/gradle/wp/build/libs/base-dev.jar .
 
 COPY ./images ./images
 
