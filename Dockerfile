@@ -16,5 +16,5 @@ COPY --from=build /home/gradle/wp/build/libs/base-dev.jar .
 
 EXPOSE 8080
 
-ENTRYPOINT java -jar system-dev.jar
+ENTRYPOINT java -jar base-dev.jar
 
