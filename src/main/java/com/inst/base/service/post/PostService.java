@@ -12,6 +12,8 @@ import java.util.UUID;
 
 @Service
 public interface PostService {
+    PageResponse<PostDTO> getFeedPosts(PageRequestParams params);
+
     Post createPost(CreatePostRequest request);
 
     PageResponse<PostDTO> getPosts(UUID userId, PageRequestParams pageRequestParams);

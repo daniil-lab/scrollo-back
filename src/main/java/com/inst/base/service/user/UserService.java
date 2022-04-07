@@ -6,6 +6,7 @@ import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.auth.SignInRequest;
 import com.inst.base.request.user.ChangeUserPasswordRequest;
 import com.inst.base.request.user.UpdateUserAvatarRequest;
+import com.inst.base.request.user.UpdateUserGeoRequest;
 import com.inst.base.request.user.UpdateUserRequest;
 import com.inst.base.util.PageResponse;
 import org.springframework.stereotype.Service;
@@ -42,4 +43,6 @@ public interface UserService {
     Boolean checkPhone(String phone);
 
     List<User> findByLoginAndName(String data);
+
+    Boolean updateUserGeo(UpdateUserGeoRequest request);
 }

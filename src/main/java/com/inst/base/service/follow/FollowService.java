@@ -5,6 +5,7 @@ import com.inst.base.entity.follow.FollowRequest;
 import com.inst.base.entity.follow.Follower;
 import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.follow.FollowOnUserRequest;
+import com.inst.base.request.follow.ModerateFollowRequest;
 import com.inst.base.util.PageResponse;
 import org.springframework.stereotype.Service;
 
@@ -27,4 +28,8 @@ public interface FollowService {
     Boolean removeFollower(UUID followId);
 
     Boolean followedOnUser(UUID id);
+
+    Boolean moderateFollowRequest(ModerateFollowRequest request);
+
+    Boolean declineFollowRequest(UUID id);
 }

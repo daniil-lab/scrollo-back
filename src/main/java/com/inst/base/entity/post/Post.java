@@ -31,6 +31,8 @@ public class Post extends TimeAudit {
     @JoinColumn(name = "place_id")
     private Place place;
 
+    private PostType type = PostType.STANDART;
+
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "post")
     private Set<PostFile> files = new LinkedHashSet<>();
 

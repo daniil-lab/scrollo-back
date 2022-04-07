@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,6 +31,7 @@ public class PostController {
     @Autowired
     private AuthHelper authHelper;
 
+    @PreAuthorize("hasAnyRole('USER')")
     @PostMapping(value = "/", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<PostDTO> createPost(
             @Valid
@@ -39,6 +41,7 @@ public class PostController {
         return new ResponseEntity<>(new PostDTO(postService.createPost(request)), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @PostMapping(value = "/like")
     public ResponseEntity<PostDTO> likePost(
             @Valid
@@ -48,6 +51,7 @@ public class PostController {
         return new ResponseEntity<>(new PostDTO(postService.likePost(request)), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @DeleteMapping(value = "/like/{likeId}")
     public ResponseEntity<PostDTO> removeLikePost(
             @PathVariable
@@ -56,6 +60,7 @@ public class PostController {
         return new ResponseEntity<>(new PostDTO(postService.removeLikePost(likeId)), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @PostMapping(value = "/save")
     public ResponseEntity<PostDTO> savePost(
             @Valid
@@ -65,6 +70,7 @@ public class PostController {
         return new ResponseEntity<>(new PostDTO(postService.savePost(request)), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @DeleteMapping(value = "/save/{postId}")
     public ResponseEntity<ApiResponse> removeSavedPost(
             @PathVariable
@@ -75,6 +81,7 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse(result, "Post " + (result ? "removed" : "does`t remove")), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @PostMapping(value = "/comment")
     public ResponseEntity<PostCommentDTO> commentPost(
             @Valid
@@ -84,6 +91,7 @@ public class PostController {
         return new ResponseEntity<>(new PostCommentDTO(postService.commentPost(request)), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @DeleteMapping(value = "/comment/{commentId}")
     public ResponseEntity<PostCommentDTO> removeCommentPost(
             @PathVariable
@@ -92,6 +100,7 @@ public class PostController {
         return new ResponseEntity<>(new PostCommentDTO(postService.removeCommentPost(commentId)), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @PostMapping(value = "/comment/like")
     public ResponseEntity<PostCommentDTO> createCommentLike(
             @Valid
@@ -101,6 +110,7 @@ public class PostController {
         return new ResponseEntity<>(new PostCommentDTO(postService.likePostComment(request)), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @DeleteMapping(value = "/comment/like/{postCommentId}")
     public ResponseEntity<PostCommentDTO> removePostCommentLike(
             @PathVariable
@@ -109,6 +119,7 @@ public class PostController {
         return new ResponseEntity<>(new PostCommentDTO(postService.removeLikeComment(postCommentId)), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @GetMapping(value = "/me")
     public ResponseEntity<PageResponse<PostDTO>> getMyPosts(
             @Valid
@@ -117,6 +128,16 @@ public class PostController {
         return new ResponseEntity<>(postService.getPosts(authHelper.getUserFromAuthCredentials().getId(), pageRequestParams), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
+    @GetMapping(value = "/feed")
+    public ResponseEntity<PageResponse<PostDTO>> getFeed(
+            @Valid
+                    PageRequestParams pageRequestParams
+    ) {
+        return new ResponseEntity<>(postService.getFeedPosts(pageRequestParams), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
     @GetMapping(value = "/user/{userId}")
     public ResponseEntity<PageResponse<PostDTO>> getPosts(
             @PathVariable
@@ -127,6 +148,7 @@ public class PostController {
         return new ResponseEntity<>(postService.getPosts(userId, pageRequestParams), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @GetMapping(value = "/{postId}")
     public ResponseEntity<PostDTO> getPostById(
             @PathVariable
@@ -135,6 +157,7 @@ public class PostController {
         return new ResponseEntity<>(new PostDTO(postService.getPostById(postId)), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     @DeleteMapping(value = "/{postId}")
     public ResponseEntity<ApiResponse> removePost(
             @PathVariable

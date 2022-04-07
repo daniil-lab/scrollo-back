@@ -19,6 +19,6 @@ public class PostLikeDTO {
             return;
 
         this.id = pl.getId();
-        this.user = new UserDTO(pl.getLikedUser());
+        this.user = pl.getLikedUser() == null ? null : new UserDTO(pl.getLikedUser());
     }
 }

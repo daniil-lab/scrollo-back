@@ -37,15 +37,18 @@ public class UserDTO {
 
     private AccountType type;
 
+    private UserDirectionDTO direction;
+
     public UserDTO(User u) {
         if(u == null)
             return;
 
+        this.direction = u.getDirection() == null ? null : new UserDirectionDTO(u.getDirection());
         this.id = u.getId();
         this.login = u.getLogin();
         this.email = u.getEmailData().getEmail();
         this.phone = u.getPhoneData().getPhone();
-        this.personal = new UserPersonalDTO(u.getPersonalInformation());
+        this.personal = u.getPersonalInformation() == null ? null : new UserPersonalDTO(u.getPersonalInformation());
         this.createAt = u.getCreatedAt();
         this.updatedAt = u.getUpdatedAt();
         this.avatar = u.getAvatar();

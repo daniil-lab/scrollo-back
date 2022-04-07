@@ -10,6 +10,8 @@ import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.follow.FollowOnUserRequest;
 import com.inst.base.repository.follow.FollowRequestRepository;
 import com.inst.base.repository.follow.FollowerRepository;
+import com.inst.base.request.follow.ModerateFollowAction;
+import com.inst.base.request.follow.ModerateFollowRequest;
 import com.inst.base.util.AuthHelper;
 import com.inst.base.util.PageResponse;
 import com.inst.base.util.ServiceException;
@@ -78,6 +80,47 @@ public class FollowServiceImpl implements FollowService {
     @Override
     public Boolean followedOnUser(UUID id) {
         return followerRepository.findByFollowerIdAndFollowedId(id, authHelper.getUserFromAuthCredentials().getId()).isPresent();
+    }
+
+    @Override
+    public Boolean declineFollowRequest(UUID id) {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        FollowRequest followRequest = followRequestRepository.findById(id).orElseThrow(() -> {
+            throw new ServiceException("Follow request not found", HttpStatus.NOT_FOUND);
+        });
+
+        if(!followRequest.getFollowingRequester().getId().equals(user.getId()))
+            throw new ServiceException("It`s not your follow request", HttpStatus.BAD_REQUEST);
+
+        followRequestRepository.delete(followRequest);
+
+        return true;
+    }
+
+    @Override
+    public Boolean moderateFollowRequest(ModerateFollowRequest request) {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        FollowRequest followRequest = followRequestRepository.findById(request.getFollowId()).orElseThrow(() -> {
+            throw new ServiceException("Follow request not found", HttpStatus.NOT_FOUND);
+        });
+
+        if(!followRequest.getFollowingReceiver().getId().equals(user.getId()))
+            throw new ServiceException("It`s not your follow request", HttpStatus.BAD_REQUEST);
+
+        if(request.getAction() == ModerateFollowAction.ACCEPT) {
+            Follower follower = new Follower();
+
+            follower.setFollowOnUser(user);
+            follower.setFollowedUser(followRequest.getFollowingRequester());
+
+            followerRepository.save(follower);
+        }
+
+        followRequestRepository.delete(followRequest);
+
+        return true;
     }
 
     @Override

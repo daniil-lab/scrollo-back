@@ -42,8 +42,8 @@ public class PostDTO {
 
         this.id = p.getId();
         this.content = p.getContent();
-        this.creator = new UserDTO(p.getCreator());
-        this.place = new PlaceDTO(p.getPlace());
+        this.creator = p.getCreator() == null ? null : new UserDTO(p.getCreator());
+        this.place = p.getPlace() == null ? null : new PlaceDTO(p.getPlace());
         this.likesCount = p.getLikes().size();
         this.commentsCount = p.getComments().size();
         this.files = p.getFiles().stream().map(PostFileDTO::new).collect(Collectors.toSet());

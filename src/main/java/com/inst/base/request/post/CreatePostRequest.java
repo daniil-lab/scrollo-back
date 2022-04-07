@@ -1,5 +1,6 @@
 package com.inst.base.request.post;
 
+import com.inst.base.entity.post.PostType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +16,9 @@ public class CreatePostRequest {
     private String content;
 
     private String place;
+
+    @NotNull
+    private PostType type;
 
     @NotNull
     private List<MultipartFile> files;

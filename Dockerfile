@@ -4,7 +4,7 @@ RUN apt-get update
 
 RUN apt-get install git
 
-RUN git clone https://daniil-lab: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@github.com/daniil-lab/scrollo-back.git wp
+COPY ./ ./wp
 
 WORKDIR wp
 

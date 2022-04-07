@@ -4,6 +4,7 @@ import com.inst.base.dto.follow.FollowerDTO;
 import com.inst.base.dto.user.UserDTO;
 import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.follow.FollowOnUserRequest;
+import com.inst.base.request.follow.ModerateFollowRequest;
 import com.inst.base.service.follow.FollowService;
 import com.inst.base.util.ApiResponse;
 import com.inst.base.util.AuthHelper;
@@ -111,5 +112,26 @@ public class FollowController {
     ) {
         boolean result = followService.followOnUser(request);
         return new ResponseEntity<>(new ApiResponse(result, "You " + (result ? "followed" : "does`t follow") + " on user"), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
+    @PostMapping("/follow-request/moderate")
+    public ResponseEntity<ApiResponse> moderateFollowRequest(
+            @RequestBody
+            @Valid
+                    ModerateFollowRequest request
+    ) {
+        boolean result = followService.moderateFollowRequest(request);
+        return new ResponseEntity<>(new ApiResponse(result, "You " + (result ? "accept" : "decline") + " follow request"), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
+    @DeleteMapping("/follow-request/decline/{followRequestId}")
+    public ResponseEntity<ApiResponse> declineFollowRequest(
+            @PathVariable
+                    UUID followRequestId
+    ) {
+        boolean result = followService.declineFollowRequest(followRequestId);
+        return new ResponseEntity<>(new ApiResponse(result, "You " + (result ? "decline" : "don`t decline") + " follow request"), HttpStatus.OK);
     }
 }

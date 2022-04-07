@@ -1,5 +1,6 @@
 package com.inst.base.entity.chat;
 
+import com.inst.base.entity.abstracted.TimeAudit;
 import com.inst.base.entity.post.Post;
 import com.inst.base.entity.user.User;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @Entity
-public class ChatMessage {
+public class ChatMessage extends TimeAudit {
     @Id
     private UUID id = UUID.randomUUID();
 

@@ -27,8 +27,8 @@ public class FollowRequestDTO {
             return;
 
         this.id = f.getId();
-        this.followingReceiver = new UserDTO(f.getFollowingReceiver());
-        this.followingRequester = new UserDTO(f.getFollowingRequester());
+        this.followingReceiver = f.getFollowingReceiver() == null ? null : new UserDTO(f.getFollowingReceiver());
+        this.followingRequester = f.getFollowingRequester() == null ? null : new UserDTO(f.getFollowingRequester());
         this.createAt = f.getCreatedAt();
         this.updatedAt = f.getUpdatedAt();
     }

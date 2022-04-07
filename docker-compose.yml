@@ -5,6 +5,7 @@ services:
     image: nginx
     networks:
       - backend
+      - backendVpn
     ports:
       - "80:80"
       - "443:443"
@@ -13,36 +14,4 @@ services:
       - ./logs/nginx:/var/log/nginx
       - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
-      - web
-
-  instBack:
-    image: "docker.pkg.github.com/daniil-lab/scrollo-back/scrollo-back:main"
-    ports:
-      - "8080:8080"
-    expose:
-      - "8080"
-    networks:
-      - backend
-    volumes:
-      - ~/images:/images
-    environment:
-      - DB_URL=jdbc:postgresql://database:5432/wp
-      - DB_USER=postgres
-      - DB_PASS=123
-    depends_on:
-      - database
-
-  database:
-    image: "postgres"
-    networks:
-      - backend
-    env_file:
-      - database.env
-    volumes:
-      - ./postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-networks:
-  backend:
-    driver: bridge
+      - instBack

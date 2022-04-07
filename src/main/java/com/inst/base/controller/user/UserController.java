@@ -1,9 +1,12 @@
 package com.inst.base.controller.user;
 
 import com.inst.base.dto.user.UserDTO;
+import com.inst.base.dto.user.UserDirectionDTO;
+import com.inst.base.entity.user.UserDirection;
 import com.inst.base.request.auth.SignInRequest;
 import com.inst.base.request.user.ChangeUserPasswordRequest;
 import com.inst.base.request.user.UpdateUserAvatarRequest;
+import com.inst.base.request.user.UpdateUserGeoRequest;
 import com.inst.base.request.user.UpdateUserRequest;
 import com.inst.base.service.user.UserService;
 import com.inst.base.util.ApiResponse;
@@ -17,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -103,6 +107,17 @@ public class UserController {
         return new ResponseEntity<>(new ApiResponse(userService.checkEmail(email), "User checked"), HttpStatus.OK);
     }
 
+    @PatchMapping("/geo")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<ApiResponse> updateGeo(
+            @Valid
+            @RequestBody
+                    UpdateUserGeoRequest request
+    ) {
+
+        return new ResponseEntity<>(new ApiResponse(userService.updateUserGeo(request), "User geo updated"), HttpStatus.OK);
+    }
+
     @GetMapping("/check-phone/{phone}")
     public ResponseEntity<ApiResponse> checkPhone(
             @Valid
@@ -121,5 +136,10 @@ public class UserController {
     ) {
 
         return new ResponseEntity<>(new ApiResponse(userService.checkLogin(login), "User checked"), HttpStatus.OK);
+    }
+
+    @GetMapping("/directions")
+    public ResponseEntity<List<UserDirectionDTO>> getDirections() {
+        return new ResponseEntity<>(Arrays.stream(UserDirection.values()).map(UserDirectionDTO::new).collect(Collectors.toList()), HttpStatus.OK);
     }
 }

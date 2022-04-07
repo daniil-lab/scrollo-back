@@ -41,6 +41,8 @@ public class User extends TimeAudit {
     @NotBlank
     private String password;
 
+    private UserDirection direction;
+
     private UserRole role = UserRole.ROLE_USER;
 
     @Embedded
@@ -49,6 +51,13 @@ public class User extends TimeAudit {
             @AttributeOverride(name = "activated", column = @Column(name = "emailData_activated"))
     })
     private UserEmail emailData = new UserEmail();
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "longitude", column = @Column(name = "geoData_longitude")),
+            @AttributeOverride(name = "latitude", column = @Column(name = "geoData_latitude"))
+    })
+    private UserGeo geo;
 
     @Embedded
     private UserPersonal personalInformation = new UserPersonal();

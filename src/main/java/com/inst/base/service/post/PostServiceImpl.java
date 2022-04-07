@@ -11,10 +11,7 @@ import com.inst.base.repository.user.UserRepository;
 import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.post.*;
 import com.inst.base.service.FileStorageService;
-import com.inst.base.util.AccessChecker;
-import com.inst.base.util.AuthHelper;
-import com.inst.base.util.PageResponse;
-import com.inst.base.util.ServiceException;
+import com.inst.base.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -58,9 +55,28 @@ public class PostServiceImpl implements PostService {
     private UserRepository userRepository;
 
     @Override
+    public PageResponse<PostDTO> getFeedPosts(PageRequestParams params) {
+        Page<Post> page = postRepository.findAll(PageRequest.of(params.getPage(), params.getPageSize()));
+
+        return new PageResponse<PostDTO>(page.getContent().stream().map(PostDTO::new).collect(Collectors.toList()),
+        params.getPage(), page.getTotalPages(), page.getTotalElements());
+    }
+
+    @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Post createPost(CreatePostRequest request) {
         User user = authHelper.getUserFromAuthCredentials();
+
+        request.getFiles().forEach((file) -> {
+            if(file.getOriginalFilename().contains(".."))
+                throw new ServiceException("Invalid filename", HttpStatus.BAD_REQUEST);
+
+            String fileType = file.getOriginalFilename().split("\\.")[file.getOriginalFilename().split("\\.").length - 1];
+
+            if(!FileValidator.checkOnImage(fileType) || !FileValidator.checkOnVideo(fileType))
+                throw new ServiceException("Invalid file type", HttpStatus.BAD_REQUEST);
+        });
+
         Post post = new Post();
 
         post.setCreator(user);
@@ -81,6 +97,8 @@ public class PostServiceImpl implements PostService {
                 post.setPlace(place);
             }
         }
+
+        post.setType(request.getType());
 
         postRepository.save(post);
 

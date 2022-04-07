@@ -4,11 +4,13 @@ import com.inst.base.config.AuthCredentials;
 import com.inst.base.dto.post.PostDTO;
 import com.inst.base.entity.post.Post;
 import com.inst.base.entity.user.User;
+import com.inst.base.entity.user.UserGeo;
 import com.inst.base.repository.user.UserRepository;
 import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.auth.SignInRequest;
 import com.inst.base.request.user.ChangeUserPasswordRequest;
 import com.inst.base.request.user.UpdateUserAvatarRequest;
+import com.inst.base.request.user.UpdateUserGeoRequest;
 import com.inst.base.request.user.UpdateUserRequest;
 import com.inst.base.service.FileStorageService;
 import com.inst.base.util.AuthHelper;
@@ -54,6 +56,9 @@ public class UserServiceImpl implements UserService {
 
             user.getEmailData().setEmail(request.getEmail());
         }
+
+        if(request.getDirection() != null)
+            user.setDirection(request.getDirection());
 
         if(request.getLogin() != null&& !request.getLogin().equals(user.getLogin())) {
             userRepository.findByLogin(request.getLogin()).ifPresent((val) -> {
@@ -183,6 +188,21 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepository.findByPhoneDataPhone(phone);
 
         return user.isPresent();
+    }
+
+    @Override
+    public Boolean updateUserGeo(UpdateUserGeoRequest request) {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        if(user.getGeo() == null)
+            user.setGeo(new UserGeo());
+
+        user.getGeo().setLatitude(request.getLatitude());
+        user.getGeo().setLongitude(request.getLongitude());
+
+        userRepository.save(user);
+
+        return true;
     }
 
     @Override
