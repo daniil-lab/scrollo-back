@@ -71,6 +71,12 @@ public class User extends TimeAudit {
     })
     private UserPhone phoneData = new UserPhone();
 
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "enablePushNotifications", column = @Column(name = "settings_enablePushNotifications")),
+    })
+    private UserSettings settings = new UserSettings();
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "followOnUser", orphanRemoval = true, cascade = CascadeType.ALL)
     private Set<Follower> followers = new LinkedHashSet<>();
 

@@ -23,6 +23,8 @@ public interface FollowService {
 
     Set<FollowRequest> getFollowRequests();
 
+    Set<FollowRequest> getSentFollowRequests();
+
     Boolean declineFollow(UUID followId);
 
     Boolean removeFollower(UUID followId);

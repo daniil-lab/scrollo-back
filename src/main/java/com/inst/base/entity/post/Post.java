@@ -40,5 +40,8 @@ public class Post extends TimeAudit {
     private Set<PostLike> likes = new LinkedHashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "post")
+    private Set<PostDislike> dislikes = new LinkedHashSet<>();
+
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "post")
     private Set<PostComment> comments = new LinkedHashSet<>();
 }

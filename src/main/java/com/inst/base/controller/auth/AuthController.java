@@ -1,11 +1,11 @@
 package com.inst.base.controller.auth;
 
 import com.inst.base.dto.user.UserDTO;
-import com.inst.base.request.auth.BaseAuthRequest;
-import com.inst.base.request.auth.RefreshTokenRequest;
-import com.inst.base.request.auth.SignInRequest;
+import com.inst.base.request.auth.*;
 import com.inst.base.response.auth.BaseAuthResponse;
+import com.inst.base.response.auth.StartEmailConfirmationResponse;
 import com.inst.base.service.auth.AuthService;
+import com.inst.base.util.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,12 +41,35 @@ public class AuthController {
     }
 
 
-    @PostMapping("/signin")
-    public ResponseEntity<UserDTO> createUser(
+//    @PostMapping("/signin")
+//    public ResponseEntity<UserDTO> createUser(
+//            @Valid
+//            @RequestBody
+//                    SignInRequest request) {
+//        return new ResponseEntity<>(new UserDTO(authService.signIn(request)), HttpStatus.CREATED);
+//    }
+
+    @PostMapping("/email-confirmation/start")
+    public ResponseEntity<StartEmailConfirmationResponse> startEmailConfirmation(
             @Valid
             @RequestBody
-                    SignInRequest request) {
-        return new ResponseEntity<>(new UserDTO(authService.signIn(request)), HttpStatus.CREATED);
+                    StartEmailConfirmationRequest request) {
+        return new ResponseEntity<>(authService.startEmailConfirmation(request), HttpStatus.OK);
     }
 
+    @PostMapping("/email-confirmation/confirm")
+    public ResponseEntity<ApiResponse> submitEmailConfirmation(
+            @Valid
+            @RequestBody
+                    SubmitEmailConfirmationRequest request) {
+        return new ResponseEntity<>(new ApiResponse(authService.submitEmailConfirmation(request), ""), HttpStatus.OK);
+    }
+
+    @PostMapping("/sign-in/email-confirmation")
+    public ResponseEntity<UserDTO> signInByEmailConfirmation(
+            @Valid
+            @RequestBody
+                    SignInByEmailConfirmationRequest request) {
+        return new ResponseEntity<>(new UserDTO(authService.signInByEmailConfirmation(request)), HttpStatus.OK);
+    }
 }

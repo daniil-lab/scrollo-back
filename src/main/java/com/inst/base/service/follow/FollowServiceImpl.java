@@ -185,4 +185,9 @@ public class FollowServiceImpl implements FollowService {
     public Set<FollowRequest> getFollowRequests() {
         return authHelper.getUserFromAuthCredentials().getFollowingRequests();
     }
+
+    @Override
+    public Set<FollowRequest> getSentFollowRequests() {
+        return authHelper.getUserFromAuthCredentials().getSentFollowingRequests();
+    }
 }

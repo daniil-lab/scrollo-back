@@ -1,17 +1,22 @@
 package com.inst.base.util;
 
+import com.inst.base.entity.user.AccountType;
 import com.inst.base.entity.user.User;
 import org.springframework.http.HttpStatus;
 
 public final class AccessChecker {
     public static boolean followedOrEquals(User user1, User user2) {
-        if(user1 == null || user2 == null)
-            return false;
+        if(user2.getAccountType() == AccountType.CLOSED) {
+            if(user1 == null || user2 == null)
+                return false;
 
-        if(user1.getId().equals(user2.getId()))
-            return true;
+            if(user1.getId().equals(user2.getId()))
+                return true;
 
-        return user1.getFollowers().contains(user2);
+            return user1.getFollowers().contains(user2);
+        }
+
+        return true;
     }
 
     public static boolean followed(User user1, User user2) {

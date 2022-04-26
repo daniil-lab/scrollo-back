@@ -61,6 +61,25 @@ public class PostController {
     }
 
     @PreAuthorize("hasAnyRole('USER')")
+    @PostMapping(value = "/dislike")
+    public ResponseEntity<PostDTO> dislikePost(
+            @Valid
+            @RequestBody
+                    CreateDislikePostRequest request
+    ) {
+        return new ResponseEntity<>(new PostDTO(postService.dislikePost(request)), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
+    @DeleteMapping(value = "/dislike/{dislikeId}")
+    public ResponseEntity<PostDTO> removeDislike(
+            @PathVariable
+                    UUID dislikeId
+    ) {
+        return new ResponseEntity<>(new PostDTO(postService.removeDislikePost(dislikeId)), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
     @PostMapping(value = "/save")
     public ResponseEntity<PostDTO> savePost(
             @Valid
@@ -126,6 +145,24 @@ public class PostController {
                 PageRequestParams pageRequestParams
     ) {
         return new ResponseEntity<>(postService.getPosts(authHelper.getUserFromAuthCredentials().getId(), pageRequestParams), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
+    @GetMapping(value = "/me/media")
+    public ResponseEntity<PageResponse<PostDTO>> getMediaPosts(
+            @Valid
+                    PageRequestParams pageRequestParams
+    ) {
+        return new ResponseEntity<>(postService.getMyMediaPosts(pageRequestParams), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
+    @GetMapping(value = "/me/text")
+    public ResponseEntity<PageResponse<PostDTO>> getTextPosts(
+            @Valid
+                    PageRequestParams pageRequestParams
+    ) {
+        return new ResponseEntity<>(postService.getMyTextPosts(pageRequestParams), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")

@@ -14,6 +14,10 @@ import java.util.UUID;
 public interface PostService {
     PageResponse<PostDTO> getFeedPosts(PageRequestParams params);
 
+    PageResponse<PostDTO> getMyTextPosts(PageRequestParams params);
+
+    PageResponse<PostDTO> getMyMediaPosts(PageRequestParams params);
+
     Post createPost(CreatePostRequest request);
 
     PageResponse<PostDTO> getPosts(UUID userId, PageRequestParams pageRequestParams);
@@ -24,9 +28,13 @@ public interface PostService {
 
     Post likePost(CreateLikePostRequest request);
 
+    Post dislikePost(CreateDislikePostRequest request);
+
     PostComment commentPost(CreatePostCommentRequest request);
 
     Post removeLikePost(UUID likeId);
+
+    Post removeDislikePost(UUID likeId);
 
     PostComment removeCommentPost(UUID commentId);
 

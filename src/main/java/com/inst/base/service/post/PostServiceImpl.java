@@ -54,6 +54,77 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PostDislikeRepository postDislikeRepository;
+
+    @Override
+    public PageResponse<PostDTO> getMyTextPosts(PageRequestParams params) {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        Page<Post> page = postRepository.findByTypeAndCreatorId(PostType.STANDART, user.getId(), PageRequest.of(params.getPage(), params.getPageSize()));
+
+        return new PageResponse<>(page.getContent().stream().map(PostDTO::new).collect(Collectors.toList()), params.getPage(),
+                page.getTotalPages(), page.getTotalElements());
+    }
+
+    @Override
+    public PageResponse<PostDTO> getMyMediaPosts(PageRequestParams params) {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        Page<Post> page = postRepository.findByTypeAndCreatorId(PostType.TEXT, user.getId(), PageRequest.of(params.getPage(), params.getPageSize()));
+
+        return new PageResponse<>(page.getContent().stream().map(PostDTO::new).collect(Collectors.toList()), params.getPage(),
+                page.getTotalPages(), page.getTotalElements());
+    }
+
+    @Override
+    public Post dislikePost(CreateDislikePostRequest request) {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        Post post = postRepository.findById(request.getPostId()).orElseThrow(() -> {
+            throw new ServiceException("Post not found", HttpStatus.NOT_FOUND);
+        });
+
+        if(!AccessChecker.followedOrEquals(user, post.getCreator()))
+            throw new ServiceException("No access", HttpStatus.FORBIDDEN);
+
+        postLikeRepository.findByPostIdAndLikedUserId(post.getId(), user.getId()).ifPresent((val) -> {
+            throw new ServiceException("Dislike already exists", HttpStatus.BAD_REQUEST);
+        });
+
+        PostDislike dislike = new PostDislike();
+
+        dislike.setDislikedUser(user);
+        dislike.setPost(post);
+
+        postDislikeRepository.save(dislike);
+
+        return post;
+    }
+
+    @Override
+    public Post removeDislikePost(UUID likeId) {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        PostDislike postDislike = postDislikeRepository.findById(likeId).orElseThrow(() -> {
+            throw new ServiceException("Dislike not found", HttpStatus.NOT_FOUND);
+        });
+
+        if(!postDislike.getDislikedUser().getId().equals(user.getId()))
+            throw new ServiceException("It`s not you like", HttpStatus.BAD_REQUEST);
+
+        Post post = postRepository.findById(postDislike.getPost().getId()).orElseThrow(() -> {
+            throw new ServiceException("Post not found", HttpStatus.NOT_FOUND);
+        });
+
+        postDislike.setPost(null);
+        postDislike.setDislikedUser(null);
+
+        postDislikeRepository.delete(postDislike);
+
+        return post;
+    }
+
     @Override
     public PageResponse<PostDTO> getFeedPosts(PageRequestParams params) {
         Page<Post> page = postRepository.findAll(PageRequest.of(params.getPage(), params.getPageSize()));
