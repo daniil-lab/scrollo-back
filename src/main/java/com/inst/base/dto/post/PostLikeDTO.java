@@ -12,13 +12,13 @@ import java.util.UUID;
 public class PostLikeDTO {
     private UUID id;
 
-    private UserDTO user;
+    private PostUserDTO user;
 
     public PostLikeDTO(PostLike pl) {
         if(pl == null)
             return;
 
         this.id = pl.getId();
-        this.user = pl.getLikedUser() == null ? null : new UserDTO(pl.getLikedUser());
+        this.user = pl.getLikedUser() == null ? null : new PostUserDTO(pl.getLikedUser());
     }
 }

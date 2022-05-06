@@ -10,6 +10,8 @@ public class ServiceErrorResponse {
 
     private String error;
 
+    private String code;
+
     private List<String> advices = new ArrayList<>();
 
     private StackTraceElement[] trace;
@@ -18,6 +20,15 @@ public class ServiceErrorResponse {
         this.trace = e.getStackTrace();
         this.error = e.getMessage();
         this.status = e.getHttpStatus().value();
+        this.code = e.getCode();
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public void addAdvice(String advice) {

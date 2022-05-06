@@ -5,6 +5,7 @@ import com.inst.base.dto.user.UserDTO;
 import com.inst.base.entity.place.Place;
 import com.inst.base.entity.post.Post;
 import com.inst.base.entity.post.PostLike;
+import com.inst.base.entity.post.PostType;
 import com.inst.base.entity.user.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,13 +23,17 @@ public class PostDTO {
 
     private String content;
 
-    private UserDTO creator;
+    private PostUserDTO creator;
 
     private PlaceDTO place;
+
+    private PostType type;
 
     private Integer likesCount;
 
     private Integer commentsCount;
+
+    private Integer dislikeCount;
 
     private Set<PostFileDTO> files;
 
@@ -36,17 +41,27 @@ public class PostDTO {
 
     private Set<PostLikeDTO> lastLikes;
 
+    private Boolean liked = false;
+
+    private Boolean commented = false;
+
+    private Boolean disliked = false;
+
+    private Boolean inSaved = false;
+
     public PostDTO(Post p) {
         if(p == null)
             return;
 
         this.id = p.getId();
         this.content = p.getContent();
-        this.creator = p.getCreator() == null ? null : new UserDTO(p.getCreator());
+        this.creator = p.getCreator() == null ? null : new PostUserDTO(p.getCreator());
         this.place = p.getPlace() == null ? null : new PlaceDTO(p.getPlace());
         this.likesCount = p.getLikes().size();
         this.commentsCount = p.getComments().size();
+        this.dislikeCount = p.getDislikes().size();
         this.files = p.getFiles().stream().map(PostFileDTO::new).collect(Collectors.toSet());
+        this.type = p.getType();
 
         if(p.getComments().size() > 3)
             this.lastComments = p.getComments().stream().limit(3).map(PostCommentDTO::new).collect(Collectors.toSet());

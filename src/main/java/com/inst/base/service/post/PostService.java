@@ -3,6 +3,7 @@ package com.inst.base.service.post;
 import com.inst.base.dto.post.PostDTO;
 import com.inst.base.entity.post.Post;
 import com.inst.base.entity.post.PostComment;
+import com.inst.base.entity.post.PostType;
 import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.post.*;
 import com.inst.base.util.PageResponse;
@@ -20,21 +21,21 @@ public interface PostService {
 
     Post createPost(CreatePostRequest request);
 
-    PageResponse<PostDTO> getPosts(UUID userId, PageRequestParams pageRequestParams);
+    PageResponse<PostDTO> getPosts(PostType type, UUID userId, PageRequestParams pageRequestParams);
 
     Post getPostById(UUID id);
 
     Boolean removePost(UUID postId);
 
-    Post likePost(CreateLikePostRequest request);
+    PostDTO likePost(CreateLikePostRequest request);
 
-    Post dislikePost(CreateDislikePostRequest request);
+    PostDTO dislikePost(CreateDislikePostRequest request);
 
     PostComment commentPost(CreatePostCommentRequest request);
 
-    Post removeLikePost(UUID likeId);
+    PostDTO removeLikePost(UUID likeId);
 
-    Post removeDislikePost(UUID likeId);
+    PostDTO removeDislikePost(UUID likeId);
 
     PostComment removeCommentPost(UUID commentId);
 

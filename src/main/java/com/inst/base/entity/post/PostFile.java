@@ -20,6 +20,8 @@ public class PostFile extends TimeAudit {
 
     private String filePath;
 
+    private PostFileType type;
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "post_id")
     private Post post;

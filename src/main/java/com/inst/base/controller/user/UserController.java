@@ -4,10 +4,7 @@ import com.inst.base.dto.user.UserDTO;
 import com.inst.base.dto.user.UserDirectionDTO;
 import com.inst.base.entity.user.UserDirection;
 import com.inst.base.request.auth.SignInRequest;
-import com.inst.base.request.user.ChangeUserPasswordRequest;
-import com.inst.base.request.user.UpdateUserAvatarRequest;
-import com.inst.base.request.user.UpdateUserGeoRequest;
-import com.inst.base.request.user.UpdateUserRequest;
+import com.inst.base.request.user.*;
 import com.inst.base.service.user.UserService;
 import com.inst.base.util.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -78,6 +75,16 @@ public class UserController {
                     UpdateUserAvatarRequest request
     ) {
         return new ResponseEntity<>(new UserDTO(userService.updateAvatar(request)), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
+    @PatchMapping(value = "/background", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<UserDTO> updateBackground(
+            @Valid
+            @ModelAttribute
+                    UpdateUserBackgroundRequest request
+    ) {
+        return new ResponseEntity<>(new UserDTO(userService.updateBackground(request)), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")

@@ -8,10 +8,7 @@ import com.inst.base.entity.user.UserGeo;
 import com.inst.base.repository.user.UserRepository;
 import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.auth.SignInRequest;
-import com.inst.base.request.user.ChangeUserPasswordRequest;
-import com.inst.base.request.user.UpdateUserAvatarRequest;
-import com.inst.base.request.user.UpdateUserGeoRequest;
-import com.inst.base.request.user.UpdateUserRequest;
+import com.inst.base.request.user.*;
 import com.inst.base.service.FileStorageService;
 import com.inst.base.util.AuthHelper;
 import com.inst.base.util.PageResponse;
@@ -57,6 +54,9 @@ public class UserServiceImpl implements UserService {
             user.getEmailData().setEmail(request.getEmail());
         }
 
+        if(request.getCareer() != null)
+            user.setCareer(request.getCareer());
+
         if(request.getDirection() != null)
             user.setDirection(request.getDirection());
 
@@ -67,7 +67,6 @@ public class UserServiceImpl implements UserService {
 
             user.setLogin(request.getLogin());
         }
-
 
         if(request.getGender() != null)
             user.getPersonalInformation().setGender(request.getGender());
@@ -123,6 +122,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User updateBackground(UpdateUserBackgroundRequest request) {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        user.setBackground(fileStorageService.storeFile(request.getBackground(), user));
+
+        userRepository.save(user);
+
+        return user;
+    }
+
+    @Override
     public User updateAvatar(UpdateUserAvatarRequest request) {
         User user = authHelper.getUserFromAuthCredentials();
 
@@ -140,6 +150,19 @@ public class UserServiceImpl implements UserService {
         fileStorageService.destroyFile(user.getAvatar());
 
         user.setAvatar(null);
+
+        userRepository.save(user);
+
+        return user;
+    }
+
+    @Override
+    public User removeBackground() {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        fileStorageService.destroyFile(user.getBackground());
+
+        user.setBackground(null);
 
         userRepository.save(user);
 

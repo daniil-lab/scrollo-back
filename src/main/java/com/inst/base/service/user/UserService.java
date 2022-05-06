@@ -4,10 +4,7 @@ import com.inst.base.dto.post.PostDTO;
 import com.inst.base.entity.user.User;
 import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.auth.SignInRequest;
-import com.inst.base.request.user.ChangeUserPasswordRequest;
-import com.inst.base.request.user.UpdateUserAvatarRequest;
-import com.inst.base.request.user.UpdateUserGeoRequest;
-import com.inst.base.request.user.UpdateUserRequest;
+import com.inst.base.request.user.*;
 import com.inst.base.util.PageResponse;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +27,11 @@ public interface UserService {
 
     User updateAvatar(UpdateUserAvatarRequest request);
 
+    User updateBackground(UpdateUserBackgroundRequest request);
+
     User removeAvatar();
+
+    User removeBackground();
 
     Boolean changeUserPassword(ChangeUserPasswordRequest request);
 

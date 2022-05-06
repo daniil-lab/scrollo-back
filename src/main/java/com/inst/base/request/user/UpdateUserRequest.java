@@ -26,4 +26,6 @@ public class UpdateUserRequest {
     private AccountType accountType;
 
     private UserDirection direction;
+
+    private String career;
 }

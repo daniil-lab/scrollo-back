@@ -2,6 +2,7 @@ package com.inst.base.controller.post;
 
 import com.inst.base.dto.post.PostCommentDTO;
 import com.inst.base.dto.post.PostDTO;
+import com.inst.base.entity.post.PostType;
 import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.post.*;
 import com.inst.base.service.post.PostService;
@@ -48,7 +49,7 @@ public class PostController {
             @RequestBody
                     CreateLikePostRequest request
     ) {
-        return new ResponseEntity<>(new PostDTO(postService.likePost(request)), HttpStatus.OK);
+        return new ResponseEntity<>(postService.likePost(request), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")
@@ -57,7 +58,7 @@ public class PostController {
             @PathVariable
                     UUID likeId
     ) {
-        return new ResponseEntity<>(new PostDTO(postService.removeLikePost(likeId)), HttpStatus.OK);
+        return new ResponseEntity<>(postService.removeLikePost(likeId), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")
@@ -67,7 +68,7 @@ public class PostController {
             @RequestBody
                     CreateDislikePostRequest request
     ) {
-        return new ResponseEntity<>(new PostDTO(postService.dislikePost(request)), HttpStatus.OK);
+        return new ResponseEntity<>(postService.dislikePost(request), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")
@@ -76,7 +77,7 @@ public class PostController {
             @PathVariable
                     UUID dislikeId
     ) {
-        return new ResponseEntity<>(new PostDTO(postService.removeDislikePost(dislikeId)), HttpStatus.OK);
+        return new ResponseEntity<>(postService.removeDislikePost(dislikeId), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")
@@ -139,33 +140,6 @@ public class PostController {
     }
 
     @PreAuthorize("hasAnyRole('USER')")
-    @GetMapping(value = "/me")
-    public ResponseEntity<PageResponse<PostDTO>> getMyPosts(
-            @Valid
-                PageRequestParams pageRequestParams
-    ) {
-        return new ResponseEntity<>(postService.getPosts(authHelper.getUserFromAuthCredentials().getId(), pageRequestParams), HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasAnyRole('USER')")
-    @GetMapping(value = "/me/media")
-    public ResponseEntity<PageResponse<PostDTO>> getMediaPosts(
-            @Valid
-                    PageRequestParams pageRequestParams
-    ) {
-        return new ResponseEntity<>(postService.getMyMediaPosts(pageRequestParams), HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasAnyRole('USER')")
-    @GetMapping(value = "/me/text")
-    public ResponseEntity<PageResponse<PostDTO>> getTextPosts(
-            @Valid
-                    PageRequestParams pageRequestParams
-    ) {
-        return new ResponseEntity<>(postService.getMyTextPosts(pageRequestParams), HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasAnyRole('USER')")
     @GetMapping(value = "/feed")
     public ResponseEntity<PageResponse<PostDTO>> getFeed(
             @Valid
@@ -180,9 +154,11 @@ public class PostController {
             @PathVariable
                     UUID userId,
             @Valid
-                    PageRequestParams pageRequestParams
+                    PageRequestParams pageRequestParams,
+            @RequestParam
+                PostType type
     ) {
-        return new ResponseEntity<>(postService.getPosts(userId, pageRequestParams), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getPosts(type, userId, pageRequestParams), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")

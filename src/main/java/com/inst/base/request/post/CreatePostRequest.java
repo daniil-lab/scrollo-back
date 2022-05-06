@@ -18,8 +18,7 @@ public class CreatePostRequest {
     private String place;
 
     @NotNull
-    private PostType type;
+    private String type;
 
-    @NotNull
     private List<MultipartFile> files;
 }

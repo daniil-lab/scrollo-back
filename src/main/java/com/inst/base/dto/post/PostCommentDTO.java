@@ -14,7 +14,7 @@ public class PostCommentDTO {
 
     private String comment;
 
-    private UserDTO user;
+    private PostUserDTO user;
 
     private Integer likesCount;
 
@@ -24,7 +24,7 @@ public class PostCommentDTO {
 
         this.id = pc.getId();
         this.comment = pc.getContent();
-        this.user = pc.getSentUser() == null ? null : new UserDTO(pc.getSentUser());
+        this.user = pc.getSentUser() == null ? null : new PostUserDTO(pc.getSentUser());
         this.likesCount = pc.getLikes().size();
     }
 

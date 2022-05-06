@@ -64,6 +64,10 @@ public class User extends TimeAudit {
 
     private String avatar;
 
+    private String background;
+
+    private String career;
+
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "phone", column = @Column(name = "phoneData_phone")),

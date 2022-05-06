@@ -1,5 +1,9 @@
 package com.inst.base.service.auth;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import com.inst.base.config.JwtProvider;
 import com.inst.base.config.RefreshJwtProvider;
 import com.inst.base.entity.auth.ConfirmationState;
@@ -63,6 +67,7 @@ public class AuthServiceImpl implements AuthService {
 
             StartEmailConfirmationResponse response = new StartEmailConfirmationResponse();
             response.setId(confirmation.getId());
+            response.setCode(confirmation.getCode());
 
             log.info("""
                     На почту %s был повторно отправлен код подтверждения: %s
@@ -147,7 +152,7 @@ public class AuthServiceImpl implements AuthService {
                 log.info("Подтверждение почты %s с кодом %s. Были исчерпаны все попытки ввода. ID подтверждения %s"
                         .formatted(confirmation.getEmail(), confirmation.getCode(), confirmation.getId()));
 
-                throw new ServiceException("Вы использовали все попытки на ввод кода. Попробуйте начать подтверждение с начала.", HttpStatus.BAD_REQUEST);
+                throw new ServiceException("MAX_ENTER_COUNT", "Вы использовали все попытки на ввод кода. Попробуйте начать подтверждение с начала.", HttpStatus.BAD_REQUEST);
             } else {
                 confirmation.setEnterCount(confirmation.getEnterCount() + 1);
 
@@ -177,7 +182,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ServiceException("Почта не подтверждена или подтверждения не существует.", HttpStatus.BAD_REQUEST);
         });
 
-        if(emailConfirmation.getExpiredAt().plus(30, ChronoUnit.MINUTES).isAfter(Instant.now())) {
+        if(emailConfirmation.getExpiredAt().plus(30, ChronoUnit.MINUTES).isBefore(Instant.now())) {
             throw new ServiceException("Подтверждение почты истекло. Подтвердите почту снова для регистрации.", HttpStatus.BAD_REQUEST);
         }
 
@@ -196,6 +201,29 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         return user;
+    }
+
+    @Override
+    public Boolean validate(ValidateTokenRequest request) {
+        try {
+            jwtProvider.validateToken(request.getToken());
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public BaseAuthResponse emailAuth(EmailAuthRequest request) {
+        User user = userRepository.findByEmailDataEmail(request.getEmail()).orElseThrow(() -> {
+            throw new ServiceException("Check auth data", HttpStatus.BAD_REQUEST);
+        });
+
+        if(!passwordEncoder.matches(PasswordValidator.decodePassword(request.getPassword()), user.getPassword()))
+            throw new ServiceException("Check auth data", HttpStatus.BAD_REQUEST);
+
+        return new BaseAuthResponse(jwtProvider.generateToken(user.getLogin(), user.getId()), refreshJwtProvider.generateToken(user.getLogin(), user.getId()), user);
     }
 
     @Override

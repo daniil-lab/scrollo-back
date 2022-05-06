@@ -1,6 +1,7 @@
 package com.inst.base.dto.post;
 
 import com.inst.base.entity.post.PostFile;
+import com.inst.base.entity.post.PostFileType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,8 @@ public class PostFileDTO {
 
     private String filePath;
 
+    private PostFileType type;
+
     public PostFileDTO(PostFile pf) {
         if(pf == null)
             return;
@@ -22,5 +25,6 @@ public class PostFileDTO {
         this.id = pf.getId();
         this.path = pf.getPath();
         this.filePath = pf.getFilePath();
+        this.type = pf.getType();
     }
 }

@@ -1,5 +1,10 @@
 package com.inst.base.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import com.inst.base.entity.user.AccountType;
 import com.inst.base.entity.user.User;
 import com.inst.base.entity.user.UserGender;
@@ -21,12 +26,20 @@ public class UserDTO {
 
     private String phone;
 
+    private String background;
+
     private UserPersonalDTO personal;
 
     private String avatar;
 
+    @JsonSerialize(using = InstantSerializer.class)
+    @JsonDeserialize(using = InstantDeserializer.class)
+    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ",timezone = "UTC")
     private Instant createAt;
 
+    @JsonSerialize(using = InstantSerializer.class)
+    @JsonDeserialize(using = InstantDeserializer.class)
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ",timezone = "UTC")
     private Instant updatedAt;
 
     private Integer postCount;
@@ -38,6 +51,8 @@ public class UserDTO {
     private AccountType type;
 
     private UserDirectionDTO direction;
+
+    private String career;
 
     public UserDTO(User u) {
         if(u == null)
@@ -56,5 +71,7 @@ public class UserDTO {
         this.followersCount = u.getFollowers().size();
         this.followingCount = u.getFollowed().size();
         this.type = u.getAccountType();
+        this.background = u.getBackground();
+        this.career = u.getCareer();
     }
 }

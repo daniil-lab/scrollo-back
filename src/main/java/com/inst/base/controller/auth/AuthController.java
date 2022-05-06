@@ -10,10 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -30,6 +27,14 @@ public class AuthController {
             @RequestBody
                     BaseAuthRequest request) {
         return new ResponseEntity<>(authService.baseAuth(request), HttpStatus.OK);
+    }
+
+    @PostMapping("/login/email")
+    public ResponseEntity<BaseAuthResponse> emailAuth(
+            @Valid
+            @RequestBody
+                    EmailAuthRequest request) {
+        return new ResponseEntity<>(authService.emailAuth(request), HttpStatus.OK);
     }
 
     @PostMapping("/refresh")
@@ -71,5 +76,13 @@ public class AuthController {
             @RequestBody
                     SignInByEmailConfirmationRequest request) {
         return new ResponseEntity<>(new UserDTO(authService.signInByEmailConfirmation(request)), HttpStatus.OK);
+    }
+
+    @PostMapping("/validate-token")
+    public ResponseEntity<ApiResponse> validateToken(
+            @Valid
+            @RequestBody
+                    ValidateTokenRequest request) {
+        return new ResponseEntity<>(new ApiResponse(authService.validate(request), ""), HttpStatus.OK);
     }
 }

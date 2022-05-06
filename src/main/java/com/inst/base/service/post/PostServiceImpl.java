@@ -15,6 +15,7 @@ import com.inst.base.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -61,7 +62,7 @@ public class PostServiceImpl implements PostService {
     public PageResponse<PostDTO> getMyTextPosts(PageRequestParams params) {
         User user = authHelper.getUserFromAuthCredentials();
 
-        Page<Post> page = postRepository.findByTypeAndCreatorId(PostType.STANDART, user.getId(), PageRequest.of(params.getPage(), params.getPageSize()));
+        Page<Post> page = postRepository.findByTypeAndCreatorId(PostType.TEXT, user.getId(), PageRequest.of(params.getPage(), params.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
 
         return new PageResponse<>(page.getContent().stream().map(PostDTO::new).collect(Collectors.toList()), params.getPage(),
                 page.getTotalPages(), page.getTotalElements());
@@ -71,14 +72,14 @@ public class PostServiceImpl implements PostService {
     public PageResponse<PostDTO> getMyMediaPosts(PageRequestParams params) {
         User user = authHelper.getUserFromAuthCredentials();
 
-        Page<Post> page = postRepository.findByTypeAndCreatorId(PostType.TEXT, user.getId(), PageRequest.of(params.getPage(), params.getPageSize()));
+        Page<Post> page = postRepository.findByTypeAndCreatorId(PostType.STANDART, user.getId(), PageRequest.of(params.getPage(), params.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
 
         return new PageResponse<>(page.getContent().stream().map(PostDTO::new).collect(Collectors.toList()), params.getPage(),
                 page.getTotalPages(), page.getTotalElements());
     }
 
     @Override
-    public Post dislikePost(CreateDislikePostRequest request) {
+    public PostDTO dislikePost(CreateDislikePostRequest request) {
         User user = authHelper.getUserFromAuthCredentials();
 
         Post post = postRepository.findById(request.getPostId()).orElseThrow(() -> {
@@ -99,11 +100,17 @@ public class PostServiceImpl implements PostService {
 
         postDislikeRepository.save(dislike);
 
-        return post;
+        PostDTO dto = new PostDTO(post);
+
+        dto.setCommented(postCommentRepository.countByPostIdAndSentUserId(post.getId(), user.getId()) > 0);
+        dto.setDisliked(true);
+        dto.setLiked(postLikeRepository.findByPostIdAndLikedUserId(post.getId(), user.getId()).isPresent());
+
+        return dto;
     }
 
     @Override
-    public Post removeDislikePost(UUID likeId) {
+    public PostDTO removeDislikePost(UUID likeId) {
         User user = authHelper.getUserFromAuthCredentials();
 
         PostDislike postDislike = postDislikeRepository.findById(likeId).orElseThrow(() -> {
@@ -122,7 +129,13 @@ public class PostServiceImpl implements PostService {
 
         postDislikeRepository.delete(postDislike);
 
-        return post;
+        PostDTO dto = new PostDTO(post);
+
+        dto.setCommented(postCommentRepository.countByPostIdAndSentUserId(post.getId(), user.getId()) > 0);
+        dto.setDisliked(false);
+        dto.setLiked(postLikeRepository.findByPostIdAndLikedUserId(post.getId(), user.getId()).isPresent());
+
+        return dto;
     }
 
     @Override
@@ -137,16 +150,6 @@ public class PostServiceImpl implements PostService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Post createPost(CreatePostRequest request) {
         User user = authHelper.getUserFromAuthCredentials();
-
-        request.getFiles().forEach((file) -> {
-            if(file.getOriginalFilename().contains(".."))
-                throw new ServiceException("Invalid filename", HttpStatus.BAD_REQUEST);
-
-            String fileType = file.getOriginalFilename().split("\\.")[file.getOriginalFilename().split("\\.").length - 1];
-
-            if(!FileValidator.checkOnImage(fileType) || !FileValidator.checkOnVideo(fileType))
-                throw new ServiceException("Invalid file type", HttpStatus.BAD_REQUEST);
-        });
 
         Post post = new Post();
 
@@ -169,27 +172,41 @@ public class PostServiceImpl implements PostService {
             }
         }
 
-        post.setType(request.getType());
+        post.setType(PostType.valueOf(request.getType().replace("\"", "")));
+
+        if(post.getType() != PostType.TEXT) {
+            if(request.getFiles() == null)
+                throw new ServiceException("Передайте файлы для загрузки", HttpStatus.BAD_REQUEST);
+
+            request.getFiles().forEach((file) -> {
+                if(file.getOriginalFilename().contains(".."))
+                    throw new ServiceException("Invalid filename", HttpStatus.BAD_REQUEST);
+
+                if(!file.getContentType().contains("video") && !file.getContentType().contains("image"))
+                    throw new ServiceException("Invalid file type", HttpStatus.BAD_REQUEST);
+            });
+
+            for (MultipartFile file : request.getFiles()) {
+                String filePath = fileStorageService.storeFile(file, user);
+
+                PostFile postFile = new PostFile();
+                postFile.setFilePath(filePath);
+                postFile.setPost(post);
+                postFile.setType(file.getContentType().contains("video") ? PostFileType.VIDEO : PostFileType.IMAGE);
+
+                postFileRepository.save(postFile);
+
+                post.getFiles().add(postFile);
+            }
+        }
 
         postRepository.save(post);
-
-        for (MultipartFile file : request.getFiles()) {
-            String filePath = fileStorageService.storeFile(file, user);
-
-            PostFile postFile = new PostFile();
-            postFile.setFilePath(filePath);
-            postFile.setPost(post);
-
-            postFileRepository.save(postFile);
-
-            post.getFiles().add(postFile);
-        }
 
         return post;
     }
 
     @Override
-    public PageResponse<PostDTO> getPosts(UUID userId, PageRequestParams pageRequestParams) {
+    public PageResponse<PostDTO> getPosts(PostType type, UUID userId, PageRequestParams pageRequestParams) {
         User user = userRepository.findById(userId).orElseThrow(() -> {
             throw new ServiceException("User not found", HttpStatus.NOT_FOUND);
         });
@@ -206,9 +223,21 @@ public class PostServiceImpl implements PostService {
             if(!AccessChecker.followedOrEquals(user, requester))
                 throw new ServiceException("No access", HttpStatus.FORBIDDEN);
 
-        Page<Post> postPage = postRepository.findAll(PageRequest.of(pageRequestParams.getPage(), pageRequestParams.getPageSize()));
+        Page<Post> postPage = postRepository.findByTypeAndCreatorId(type, userId, PageRequest.of(pageRequestParams.getPage(), pageRequestParams.getPageSize()));
 
-        return new PageResponse<>(postPage.getContent().stream().map(PostDTO::new).collect(Collectors.toList()), pageRequestParams.getPage(), postPage.getTotalPages(), postPage.getTotalElements());
+        User finalRequester = requester;
+
+        return new PageResponse<PostDTO>(postPage.getContent().stream().map((p) -> {
+            PostDTO dto = new PostDTO(p);
+
+            if(finalRequester != null) {
+                dto.setLiked(postLikeRepository.findByPostIdAndLikedUserId(p.getId(), finalRequester.getId()).isPresent());
+                dto.setCommented(postCommentRepository.countByPostIdAndSentUserId(p.getId(), finalRequester.getId()) > 0);
+                dto.setDisliked(postDislikeRepository.findByPostIdAndDislikedUserId(p.getId(), finalRequester.getId()).isPresent());
+            }
+
+            return dto;
+        }).collect(Collectors.toList()), pageRequestParams.getPage(), postPage.getTotalPages(), postPage.getTotalElements());
     }
 
     @Override
@@ -247,7 +276,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post likePost(CreateLikePostRequest request) {
+    public PostDTO likePost(CreateLikePostRequest request) {
         User user = authHelper.getUserFromAuthCredentials();
 
         Post post = postRepository.findById(request.getPostId()).orElseThrow(() -> {
@@ -268,7 +297,13 @@ public class PostServiceImpl implements PostService {
 
         postLikeRepository.save(like);
 
-        return post;
+        PostDTO dto = new PostDTO(post);
+
+        dto.setLiked(true);
+        dto.setCommented(postCommentRepository.countByPostIdAndSentUserId(post.getId(), user.getId()) > 0);
+        dto.setDisliked(postDislikeRepository.findByPostIdAndDislikedUserId(post.getId(), user.getId()).isPresent());
+
+        return dto;
     }
 
     @Override
@@ -295,7 +330,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post removeLikePost(UUID likeId) {
+    public PostDTO removeLikePost(UUID likeId) {
         User user = authHelper.getUserFromAuthCredentials();
 
         PostLike postLike = postLikeRepository.findById(likeId).orElseThrow(() -> {
@@ -314,7 +349,13 @@ public class PostServiceImpl implements PostService {
 
         postLikeRepository.delete(postLike);
 
-        return post;
+        PostDTO dto = new PostDTO(post);
+
+        dto.setLiked(false);
+        dto.setCommented(postCommentRepository.countByPostIdAndSentUserId(post.getId(), user.getId()) > 0);
+        dto.setDisliked(postDislikeRepository.findByPostIdAndDislikedUserId(post.getId(), user.getId()).isPresent());
+
+        return dto;
     }
 
     @Override
