@@ -23,7 +23,7 @@ public interface PostService {
 
     PageResponse<PostDTO> getPosts(PostType type, UUID userId, PageRequestParams pageRequestParams);
 
-    Post getPostById(UUID id);
+    PostDTO getPostById(UUID id);
 
     Boolean removePost(UUID postId);
 

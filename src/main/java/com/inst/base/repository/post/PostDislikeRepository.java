@@ -10,5 +10,5 @@ import java.util.UUID;
 
 @Repository
 public interface PostDislikeRepository extends JpaRepository<PostDislike, UUID> {
-    Optional<PostLike> findByPostIdAndDislikedUserId(UUID postId, UUID userId);
+    Optional<PostDislike> findByPostIdAndDislikedUserId(UUID postId, UUID userId);
 }

@@ -1,6 +1,7 @@
 package com.inst.base.service.user;
 
 import com.inst.base.dto.post.PostDTO;
+import com.inst.base.dto.user.UserDTO;
 import com.inst.base.entity.user.User;
 import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.auth.SignInRequest;
@@ -23,7 +24,7 @@ public interface UserService {
 
     User getUserInfo();
 
-    User getUserById(UUID id);
+    UserDTO getUserById(UUID id);
 
     User updateAvatar(UpdateUserAvatarRequest request);
 
@@ -43,7 +44,7 @@ public interface UserService {
 
     Boolean checkPhone(String phone);
 
-    List<User> findByLoginAndName(String data);
+    PageResponse<UserDTO> findByLoginAndName(String data, PageRequestParams params);
 
     Boolean updateUserGeo(UpdateUserGeoRequest request);
 }

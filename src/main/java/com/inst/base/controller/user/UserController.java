@@ -3,10 +3,12 @@ package com.inst.base.controller.user;
 import com.inst.base.dto.user.UserDTO;
 import com.inst.base.dto.user.UserDirectionDTO;
 import com.inst.base.entity.user.UserDirection;
+import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.auth.SignInRequest;
 import com.inst.base.request.user.*;
 import com.inst.base.service.user.UserService;
 import com.inst.base.util.ApiResponse;
+import com.inst.base.util.PageResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,16 +45,17 @@ public class UserController {
             @PathVariable
                     UUID userId
     ) {
-        return new ResponseEntity<>(new UserDTO(userService.getUserById(userId)), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getUserById(userId), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")
     @GetMapping("/finding/{loginOrName}")
-    public ResponseEntity<Set<UserDTO>> findUsers(
+    public ResponseEntity<PageResponse<UserDTO>> findUsers(
             @PathVariable
-                    String loginOrName
+                    String loginOrName,
+            PageRequestParams params
     ) {
-        return new ResponseEntity<>(userService.findByLoginAndName(loginOrName).stream().map(UserDTO::new).collect(Collectors.toSet()), HttpStatus.OK);
+        return new ResponseEntity<>(userService.findByLoginAndName(loginOrName, params), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")

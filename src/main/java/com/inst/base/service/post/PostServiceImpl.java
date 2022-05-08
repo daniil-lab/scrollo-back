@@ -89,7 +89,7 @@ public class PostServiceImpl implements PostService {
         if(!AccessChecker.followedOrEquals(user, post.getCreator()))
             throw new ServiceException("No access", HttpStatus.FORBIDDEN);
 
-        postLikeRepository.findByPostIdAndLikedUserId(post.getId(), user.getId()).ifPresent((val) -> {
+        postDislikeRepository.findByPostIdAndDislikedUserId(post.getId(), user.getId()).ifPresent((val) -> {
             throw new ServiceException("Dislike already exists", HttpStatus.BAD_REQUEST);
         });
 
@@ -110,15 +110,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDTO removeDislikePost(UUID likeId) {
+    public PostDTO removeDislikePost(UUID postId) {
         User user = authHelper.getUserFromAuthCredentials();
 
-        PostDislike postDislike = postDislikeRepository.findById(likeId).orElseThrow(() -> {
+        PostDislike postDislike = postDislikeRepository.findByPostIdAndDislikedUserId(postId, user.getId()).orElseThrow(() -> {
             throw new ServiceException("Dislike not found", HttpStatus.NOT_FOUND);
         });
-
-        if(!postDislike.getDislikedUser().getId().equals(user.getId()))
-            throw new ServiceException("It`s not you like", HttpStatus.BAD_REQUEST);
 
         Post post = postRepository.findById(postDislike.getPost().getId()).orElseThrow(() -> {
             throw new ServiceException("Post not found", HttpStatus.NOT_FOUND);
@@ -140,9 +137,19 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PageResponse<PostDTO> getFeedPosts(PageRequestParams params) {
-        Page<Post> page = postRepository.findAll(PageRequest.of(params.getPage(), params.getPageSize()));
+        User user = authHelper.getUserFromAuthCredentials();
 
-        return new PageResponse<PostDTO>(page.getContent().stream().map(PostDTO::new).collect(Collectors.toList()),
+        Page<Post> page = postRepository.getFeed(user.getId(), PageRequest.of(params.getPage(), params.getPageSize()));
+
+        return new PageResponse<PostDTO>(page.getContent().stream().map((p) -> {
+            PostDTO dto = new PostDTO(p);
+
+            dto.setCommented(postCommentRepository.countByPostIdAndSentUserId(p.getId(), user.getId()) > 0);
+            dto.setDisliked(postDislikeRepository.findByPostIdAndDislikedUserId(p.getId(), user.getId()).isPresent());
+            dto.setLiked(postLikeRepository.findByPostIdAndLikedUserId(p.getId(), user.getId()).isPresent());
+
+            return dto;
+        }).collect(Collectors.toList()),
         params.getPage(), page.getTotalPages(), page.getTotalElements());
     }
 
@@ -241,7 +248,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post getPostById(UUID id) {
+    public PostDTO getPostById(UUID id) {
         Post post = postRepository.findById(id).orElseThrow(() -> {
             throw new ServiceException("Post not found", HttpStatus.NOT_FOUND);
         });
@@ -258,7 +265,15 @@ public class PostServiceImpl implements PostService {
             if(!AccessChecker.followedOrEquals(post.getCreator(), requester))
                 throw new ServiceException("No access", HttpStatus.FORBIDDEN);
 
-        return post;
+        PostDTO dto = new PostDTO(post);
+
+        if(requester != null) {
+            dto.setLiked(postLikeRepository.findByPostIdAndLikedUserId(post.getId(), requester.getId()).isPresent());
+            dto.setCommented(postCommentRepository.countByPostIdAndSentUserId(post.getId(), requester.getId()) > 0);
+            dto.setDisliked(postDislikeRepository.findByPostIdAndDislikedUserId(post.getId(), requester.getId()).isPresent());
+        }
+
+        return dto;
     }
 
     @Override
@@ -330,15 +345,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostDTO removeLikePost(UUID likeId) {
+    public PostDTO removeLikePost(UUID postId) {
         User user = authHelper.getUserFromAuthCredentials();
 
-        PostLike postLike = postLikeRepository.findById(likeId).orElseThrow(() -> {
+        PostLike postLike = postLikeRepository.findByPostIdAndLikedUserId(postId, user.getId()).orElseThrow(() -> {
             throw new ServiceException("Like not found", HttpStatus.NOT_FOUND);
         });
-
-        if(!postLike.getLikedUser().getId().equals(user.getId()))
-            throw new ServiceException("It`s not you like", HttpStatus.BAD_REQUEST);
 
         Post post = postRepository.findById(postLike.getPost().getId()).orElseThrow(() -> {
             throw new ServiceException("Post not found", HttpStatus.NOT_FOUND);

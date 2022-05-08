@@ -2,9 +2,11 @@ package com.inst.base.service.user;
 
 import com.inst.base.config.AuthCredentials;
 import com.inst.base.dto.post.PostDTO;
+import com.inst.base.dto.user.UserDTO;
 import com.inst.base.entity.post.Post;
 import com.inst.base.entity.user.User;
 import com.inst.base.entity.user.UserGeo;
+import com.inst.base.repository.follow.FollowerRepository;
 import com.inst.base.repository.user.UserRepository;
 import com.inst.base.request.PageRequestParams;
 import com.inst.base.request.auth.SignInRequest;
@@ -16,6 +18,7 @@ import com.inst.base.util.PasswordValidator;
 import com.inst.base.util.ServiceException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,6 +41,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private AuthHelper authHelper;
+
+    @Autowired
+    private FollowerRepository followerRepository;
 
     @Override
     public User updateUser(UpdateUserRequest request) {
@@ -115,10 +121,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserById(UUID id) {
-        return userRepository.findById(id).orElseThrow(() -> {
+    public UserDTO getUserById(UUID id) {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        User foundUser = userRepository.findById(id).orElseThrow(() -> {
             throw new ServiceException("User with given ID not found", HttpStatus.NOT_FOUND);
         });
+
+        UserDTO dto = new UserDTO(foundUser);
+
+        dto.setFollowOnHim(followerRepository.findByFollowerIdAndFollowedId(user.getId(), foundUser.getId()).isPresent());
+        dto.setFollower(followerRepository.findByFollowerIdAndFollowedId(foundUser.getId(), user.getId()).isPresent());
+
+        return dto;
     }
 
     @Override
@@ -185,8 +200,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findByLoginAndName(String data) {
-        return userRepository.findByLoginContainingOrPersonalInformationNameContaining(data, data, PageRequest.of(0, 50)).getContent();
+    public PageResponse<UserDTO> findByLoginAndName(String data, PageRequestParams params) {
+        User user = authHelper.getUserFromAuthCredentials();
+
+        Page<User> page = userRepository.findByLoginContainingOrPersonalInformationNameContainingAndIdNot(data, data, user.getId(), PageRequest.of(params.getPage(), params.getPageSize()));
+        return new PageResponse<>(page.getContent().stream().map(UserDTO::new).collect(Collectors.toList()),
+                params.getPage(), page.getTotalPages(), page.getTotalElements());
     }
 
     @Override

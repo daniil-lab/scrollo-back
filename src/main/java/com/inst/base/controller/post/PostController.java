@@ -53,12 +53,12 @@ public class PostController {
     }
 
     @PreAuthorize("hasAnyRole('USER')")
-    @DeleteMapping(value = "/like/{likeId}")
+    @DeleteMapping(value = "/like/{postId}")
     public ResponseEntity<PostDTO> removeLikePost(
             @PathVariable
-                    UUID likeId
+                    UUID postId
     ) {
-        return new ResponseEntity<>(postService.removeLikePost(likeId), HttpStatus.OK);
+        return new ResponseEntity<>(postService.removeLikePost(postId), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")
@@ -72,12 +72,12 @@ public class PostController {
     }
 
     @PreAuthorize("hasAnyRole('USER')")
-    @DeleteMapping(value = "/dislike/{dislikeId}")
+    @DeleteMapping(value = "/dislike/{postId}")
     public ResponseEntity<PostDTO> removeDislike(
             @PathVariable
-                    UUID dislikeId
+                    UUID postId
     ) {
-        return new ResponseEntity<>(postService.removeDislikePost(dislikeId), HttpStatus.OK);
+        return new ResponseEntity<>(postService.removeDislikePost(postId), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")
@@ -167,7 +167,7 @@ public class PostController {
             @PathVariable
                     UUID postId
     ) {
-        return new ResponseEntity<>(new PostDTO(postService.getPostById(postId)), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getPostById(postId), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('USER')")

@@ -54,6 +54,10 @@ public class UserDTO {
 
     private String career;
 
+    private Boolean followOnHim = false;
+
+    private Boolean follower = false;
+
     public UserDTO(User u) {
         if(u == null)
             return;

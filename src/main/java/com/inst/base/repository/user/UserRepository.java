@@ -22,5 +22,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByIdAndFollowedId(UUID userId, UUID followedId);
 
-    Page<User> findByLoginContainingOrPersonalInformationNameContaining(String username, String name, Pageable pageable);
+    Page<User> findByLoginContainingOrPersonalInformationNameContainingAndIdNot(String username, String name, UUID userId, Pageable pageable);
 }
